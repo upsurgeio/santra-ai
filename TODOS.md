@@ -12,3 +12,5 @@ code style
 - no fallbacks i repeat no fallbacks
 - use ES6 standard.
 - use good dir structure.
+- no magic numbers and strings
+- no hardcoded values paths urls
