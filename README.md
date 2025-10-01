@@ -1,2 +1,2 @@
-# Santra AI
+# santra ai
 
