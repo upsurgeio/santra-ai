@@ -25,6 +25,7 @@
   "homepage": "https://github.com/upsurgeio/santra-ai#readme",
   "dependencies": {
     "chalk": "^5.6.2",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0"
   }
 }

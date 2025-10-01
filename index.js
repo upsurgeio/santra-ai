@@ -1,7 +1,10 @@
 import express from 'express';
-import logger from './src/logger.js';
+import { createLogger } from './src/logger.js';
 import ideaProcessor from './src/ideaProcessor.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
+const logger = createLogger('Server');
 const app = express();
 const port = process.env.PORT;
 
