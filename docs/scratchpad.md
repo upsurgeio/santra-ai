@@ -57,3 +57,16 @@ The core processing function will require careful design to ensure accurate stru
 - hey hey the doc structure can exactly be like obsidian right?
 - we need a noSQL database right? MongoDB?
 - 
+
+- do we want to give the user to structure the docs? nope.
+- what if they want to use some markdown features like tables, code blocks, or list etc.? -- the assumption is the llm will create that.
+
+
+- structure found in obsidian -- a doc is a md file which can be hyperlinked to other docs at specific position.
+
+- 
+
+## Future Features
+- Team collaboration.
+- Integrations with tools like Slack.
+- LLM-suggested major updates to existing docs (with user approval).
