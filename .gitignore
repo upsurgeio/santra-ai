@@ -60,3 +60,7 @@ build/
 # Temporary files
 *.tmp
 *.temp
+
+# Data files
+/data
+
