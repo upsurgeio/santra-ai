@@ -7,7 +7,9 @@ const GRAPH_CONFIG = {
   width: 800,
   height: 600,
   nodeRadius: 30,
-  gridSpacing: 120
+  gridSpacing: 120,
+  linkDistance: 100,
+  chargeStrength: -800
 };
 
 // Graph state
@@ -154,6 +156,9 @@ function renderGraph(ideas) {
     .style('fill', '#333')
     .text(d => truncateText(d.title, 15));
 
+  // Start force simulation
+  startSimulation();
+
   // Update network info display
   updateNetworkInfo(nodes.length, links.length);
 }
@@ -186,6 +191,52 @@ function clearGraph() {
   nodes = [];
   links = [];
   updateNetworkInfo(0, 0);
+}
+
+/**
+ * Start the force simulation
+ */
+function startSimulation() {
+  simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).distance(GRAPH_CONFIG.linkDistance))
+    .force('charge', d3.forceManyBody().strength(GRAPH_CONFIG.chargeStrength))
+    .force('center', d3.forceCenter(GRAPH_CONFIG.width / 2, GRAPH_CONFIG.height / 2))
+    .force('collision', d3.forceCollide().radius(GRAPH_CONFIG.nodeRadius + 10));
+
+  // Update positions on simulation tick
+  simulation.on('tick', () => {
+    // Update link positions
+    svg.selectAll('.link')
+      .attr('x1', d => d.source.x)
+      .attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x)
+      .attr('y2', d => d.target.y);
+
+    // Update node positions
+    svg.selectAll('.node')
+      .attr('transform', d => `translate(${d.x},${d.y})`);
+  });
+
+  // Add drag behavior to nodes
+  svg.selectAll('.node')
+    .call(d3.drag()
+      .on('start', (event, d) => {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+        d3.select(event.sourceEvent.target.closest('.node')).classed('dragging', true);
+      })
+      .on('drag', (event, d) => {
+        d.fx = event.x;
+        d.fy = event.y;
+      })
+      .on('end', (event, d) => {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+        d3.select(event.sourceEvent.target.closest('.node')).classed('dragging', false);
+      })
+    );
 }
 
 /**
