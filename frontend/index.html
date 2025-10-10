@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Santra AI - Idea Processor</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Top Omnibar -->
+    <div class="omnibar-container">
+      <input
+        type="text"
+        class="omnibar"
+        placeholder="Enter your idea here..."
+        id="ideaInput"
+      >
+      <button class="submit-btn" id="submitBtn">Process</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Left Sidebar -->
+      <div class="sidebar">
+        <h3>Ideas</h3>
+        <div class="idea-list" id="ideaList"></div>
+      </div>
+
+      <!-- Idea Viewer -->
+      <div class="idea-viewer">
+        <div class="viewer-header">
+          <h3 id="viewerTitle">Select an idea to view</h3>
+          <div class="viewer-meta" id="viewerMeta"></div>
+        </div>
+        <div class="viewer-content">
+          <pre id="viewerMarkdown">Click on an idea in the sidebar to view its content...</pre>
+        </div>
+      </div>
+
+      <!-- Graph View -->
+      <div class="graph-container">
+        <div class="graph-controls">
+          <div class="network-info">
+            <span id="nodeCount">0 nodes</span> | <span id="linkCount">0 connections</span>
+          </div>
+          <button class="control-btn" id="zoomIn">Zoom In</button>
+          <button class="control-btn" id="zoomOut">Zoom Out</button>
+          <button class="control-btn" id="resetView">Reset</button>
+        </div>
+        <svg class="graph-svg" id="graphSvg"></svg>
+      </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar" id="statusBar">
+      Ready
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="graph.js"></script>
+</body>
+</html>
