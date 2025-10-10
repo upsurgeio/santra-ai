@@ -4,7 +4,7 @@ import ideaProcessor from './src/ideaProcessor.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import { randomUUID } from 'crypto';
+import cors from 'cors';
 dotenv.config();
 
 const logger = createLogger('Server');
@@ -12,6 +12,10 @@ const app = express();
 const port = process.env.PORT;
 
 // Middleware
+app.use(cors({
+  origin: ['http://localhost:8080', 'http://127.0.0.1:8080'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes
@@ -29,30 +33,45 @@ app.post('/process-idea', async (req, res) => {
     }
 
     logger.info(`Processing idea: ${idea.substring(0, 50)}...`);
-    const result = await ideaProcessor.processIdea(idea);
+
+    // Load all previous ideas for context
+    const contextIdeas = ideaProcessor.loadAllIdeas();
+
+    // Process the idea with context
+    const processedIdeas = await ideaProcessor.processIdea(idea, contextIdeas);
+
     logger.success('Idea processed successfully');
 
-    // Save to file
-    const id = randomUUID();
-    const dir = 'data/ideas/';
-    fs.mkdirSync(dir, { recursive: true });
-    const filename = `${dir}${id}.md`;
-    const frontmatter = `---
-id: "${id}"
-title: "${result.title}"
-tags: ${JSON.stringify(result.tags)}
-connections: ${JSON.stringify(result.connections)}
-created: "${new Date().toISOString()}"
-modified: "${new Date().toISOString()}"
-source: "CLI"
----
-`;
-    const content = frontmatter + result.refined;
-    fs.writeFileSync(filename, content);
-    result.id = id;
-    logger.success(`Idea saved as ${filename}`);
+    // Handle both single idea and multiple ideas
+    const ideas = Array.isArray(processedIdeas) ? processedIdeas : [processedIdeas];
+    const savedIdeas = [];
 
-    res.json(result);
+    // Save each processed idea
+    for (const processedIdea of ideas) {
+      try {
+        const filename = ideaProcessor.saveProcessedIdea(processedIdea);
+        savedIdeas.push({
+          id: processedIdea.id,
+          title: processedIdea.title,
+          filename: filename
+        });
+        logger.success(`Idea saved as ${filename}`);
+      } catch (saveError) {
+        logger.error(`Failed to save idea ${processedIdea.id}: ${saveError.message}`);
+        // Continue with other ideas even if one fails to save
+      }
+    }
+
+    // Return appropriate response
+    if (savedIdeas.length === 0) {
+      throw new Error('No ideas were successfully saved');
+    }
+
+    const response = savedIdeas.length === 1
+      ? { ...processedIdeas, id: savedIdeas[0].id }  // Single idea response
+      : { ideas: savedIdeas, count: savedIdeas.length }; // Multiple ideas response
+
+    res.json(response);
   } catch (error) {
     logger.error(`Error processing idea: ${error.message}`);
     res.status(500).json({ error: 'Processing failed' });
@@ -87,7 +106,7 @@ app.get('/list-ideas', (req, res) => {
           }
           obj[key] = value;
         });
-        return { id: obj.id, title: obj.title, tags: obj.tags, created: obj.created };
+        return { id: obj.id, title: obj.title, tags: obj.tags, connections: obj.connections, created: obj.created };
       } catch (e) {
         return null;
       }
